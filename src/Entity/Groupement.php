@@ -12,6 +12,10 @@ class Groupement
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    private ?int $id = null;
+        /** @var Collection<int, Campagne> */
+    #[ORM\OneToMany(targetEntity: Campagne::class, mappedBy: 'groupement')]
+    private Collection $campagnes;
         /** @var Collection<int, Membre> */
     #[ORM\OneToMany(targetEntity: Membre::class, mappedBy: 'groupement')]
     private Collection $membres;
@@ -19,6 +23,7 @@ class Groupement
     public function __construct()
     {
         $this->membres = new ArrayCollection();
+        $this->campagnes = new ArrayCollection();
     }
 
     /** @return Collection<int, Membre> */
@@ -45,7 +50,31 @@ class Groupement
 
         return $this;
     }
-    private ?int $id = null;
+        /** @return Collection<int, Campagne> */
+    public function getCampagnes(): Collection
+    {
+        return $this->campagnes;
+    }
+
+    public function addCampagne(Campagne $campagne): static
+    {
+        if (!$this->campagnes->contains($campagne)) {
+            $this->campagnes->add($campagne);
+            $campagne->setGroupement($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCampagne(Campagne $campagne): static
+    {
+        if ($this->campagnes->removeElement($campagne) && $campagne->getGroupement() === $this) {
+            $campagne->setGroupement(null);
+        }
+
+        return $this;
+    }
+    
 
     #[ORM\Column(length: 100)]
     private ?string $nom = null;
