@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\CampagneRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: CampagneRepository::class)]
 class Campagne
@@ -33,7 +35,30 @@ class Campagne
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?TypeCampagne $type = null;
+        /** @var Collection<int, ModeCotisation> */
+    #[ORM\OneToMany(targetEntity: ModeCotisation::class, mappedBy: 'campagne', orphanRemoval: true)]
+    private Collection $modesCotisation;
 
+    public function __construct()
+    {
+        $this->modesCotisation = new ArrayCollection();
+    }
+
+    /** @return Collection<int, ModeCotisation> */
+    public function getModesCotisation(): Collection
+    {
+        return $this->modesCotisation;
+    }
+
+    public function addModeCotisation(ModeCotisation $mode): static
+    {
+        if (!$this->modesCotisation->contains($mode)) {
+            $this->modesCotisation->add($mode);
+            $mode->setCampagne($this);
+        }
+
+        return $this;
+    }
     public function getId(): ?int
     {
         return $this->id;
